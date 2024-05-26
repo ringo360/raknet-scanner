@@ -22,7 +22,8 @@ const args = yargs
 	})
 	.parseSync();
 
-let list = [];
+let found = [];
+let ports = [];
 
 async function lookup() {
 	try {
@@ -33,6 +34,17 @@ async function lookup() {
 		process.exit();
 	}
 }
+
+async function list_rm(x) {
+	const index = ports.indexOf(x);
+	if (index !== -1) {
+		ports.splice(index, 1);
+		return true;
+	} else {
+		return false;
+	}
+}
+
 async function send(ip, port) {
 	const socket = dgram.createSocket('udp4');
 	const bb = new ByteBuffer();
@@ -54,18 +66,29 @@ async function send(ip, port) {
 
 		socket.on('message', () => {
 			console.log('pong!');
-			list.push(port);
+			found.push(port);
+			list_rm(port);
 			resolve(true);
 		});
 
 		setTimeout(() => {
+			list_rm(port);
 			resolve(false);
-		}, 1000); // 2秒待機
+		}, 1000); // x秒待機
 	});
 
 	const result = await messagePromise;
 	socket.close();
 	return result;
+}
+
+async function wait_complete() {
+	while (ports.length > 0) {
+		// console.log('Waiting... len:' + ports.length);
+		// console.log(ports);
+		await delay(500);
+	}
+	return;
 }
 
 async function main() {
@@ -80,11 +103,15 @@ async function main() {
 		process.exit(1);
 	}
 	for (let i = start; i <= end; i++) {
-		console.log(`Scanning port ${i}...`);
-		await send(ip, i);
+		ports.push(i);
+		console.log(`Target: ${i}`);
+		send(ip, i);
 	}
+	console.log('Waiting...');
+	await wait_complete();
+	console.log('Done!');
 	console.log('Result');
-	console.log(list);
+	console.log(found);
 	process.exit(0);
 }
 
