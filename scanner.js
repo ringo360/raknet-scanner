@@ -3,6 +3,7 @@ const dgram = require('dgram');
 const ByteBuffer = require('bytebuffer');
 const yargs = require('yargs');
 const dns = require('dns').promises;
+const { consola } = require('consola');
 const args = yargs
 	.command('* [options] <destination>', 'Raknet Scaner', (yargs) => {
 		return yargs
@@ -65,7 +66,7 @@ async function send(ip, port) {
 		});
 
 		socket.on('message', () => {
-			console.log('pong!');
+			// console.log('pong!'); dev
 			found.push(port);
 			list_rm(port);
 			resolve(true);
@@ -91,27 +92,38 @@ async function wait_complete() {
 	return;
 }
 
+async function port_sort(list) {
+	list.sort((a, b) => a - b);
+	const result = list.join(',');
+	return result;
+}
+
 async function main() {
 	const ip = await lookup();
 	// console.log(args); dev
 	const start = args.s;
 	const end = args.e;
-	console.log(`IP: ${ip}, ${start} - ${end}`);
+	// console.log(`IP: ${ip}, ${start} - ${end}`);
+	consola.start(`Scanning ${ip}... (Range: ${start}-${end})`);
 	if (start > end) {
-		console.error(`StartとEndの値が不正です! Start: ${start}, End: ${end}`);
-		console.log('終了します...');
+		consola.fail('Failed!');
+		consola.error(`Invalid Param! Start: ${start}, End: ${end}`);
+		consola.log('Goodbye');
 		process.exit(1);
 	}
 	for (let i = start; i <= end; i++) {
 		ports.push(i);
-		console.log(`Target: ${i}`);
+		// console.log(`Target: ${i}`); dev
 		send(ip, i);
 	}
-	console.log('Waiting...');
 	await wait_complete();
-	console.log('Done!');
-	console.log('Result');
-	console.log(found);
+	consola.success('Done!');
+	if (found.length !== 0) {
+		const result = await port_sort(found);
+		consola.box(`Found! ${ip} is running server at ${result}!`);
+	} else {
+		consola.box(`Uhh, ${ip} is not running any server`);
+	}
 	process.exit(0);
 }
 

@@ -1,13 +1,14 @@
 {
-  "dependencies": {
-    "bytebuffer": "^5.0.1",
-    "yargs": "^17.7.2"
-  },
-  "name": "raknet-scanner",
-  "version": "1.0.0",
-  "description": "raknet port scanner",
-  "main": "scanner.js",
-  "repository": "https://github.com/ringo360/mcbe-port-scanner.git",
-  "author": "ringoXD",
-  "license": "AGPL-3.0"
+	"dependencies": {
+		"bytebuffer": "^5.0.1",
+		"consola": "^3.2.3",
+		"yargs": "^17.7.2"
+	},
+	"name": "raknet-scanner",
+	"version": "1.0.1",
+	"description": "raknet port scanner",
+	"main": "scanner.js",
+	"repository": "https://github.com/ringo360/mcbe-port-scanner.git",
+	"author": "ringoXD",
+	"license": "AGPL-3.0"
 }
