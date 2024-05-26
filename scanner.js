@@ -30,7 +30,7 @@ async function lookup() {
 		const targetIp = (await dns.lookup(args.destination)).address;
 		return targetIp;
 	} catch {
-		console.log(`rnping: ${args.destination}: Name or service not known`);
+		console.log(`${args.destination}: Name or service not known`);
 		process.exit();
 	}
 }
