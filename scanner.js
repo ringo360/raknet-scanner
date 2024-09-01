@@ -120,9 +120,9 @@ async function main() {
 	consola.success('Done!');
 	if (found.length !== 0) {
 		const result = await port_sort(found);
-		consola.box(`Found! ${ip} has running server at ${result}!`);
+		consola.box(`${ip} has running server at ${result}!`);
 	} else {
-		consola.box(`Uhh, ${ip} has not running any server`);
+		consola.box(`${ip} has not running any server...`);
 	}
 	process.exit(0);
 }
