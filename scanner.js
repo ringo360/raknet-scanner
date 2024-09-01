@@ -25,6 +25,7 @@ const args = yargs
 
 let found = [];
 let ports = [];
+const batchSize = 100;
 
 async function lookup() {
 	try {
@@ -51,12 +52,7 @@ async function send(ip, port) {
 	const bb = new ByteBuffer();
 	bb.buffer[0] = 0x01;
 	bb.offset = 1;
-	const ping = bb
-		.writeLong(1)
-		.append('00ffff00fefefefefdfdfdfd12345678', 'hex')
-		.writeLong(0)
-		.flip()
-		.compact();
+	const ping = bb.writeLong(1).append('00ffff00fefefefefdfdfdfd12345678', 'hex').writeLong(0).flip().compact();
 
 	const messagePromise = new Promise((resolve, reject) => {
 		socket.send(ping.buffer, 0, ping.buffer.length, port, ip, (err) => {
@@ -111,10 +107,14 @@ async function main() {
 		consola.log('Goodbye');
 		process.exit(1);
 	}
-	for (let i = start; i <= end; i++) {
-		ports.push(i);
-		// console.log(`Target: ${i}`); dev
-		send(ip, i);
+	for (let i = start; i <= end; i += batchSize) {
+		const batchEnd = Math.min(i + batchSize - 1, end);
+		consola.log(`Scanning ${i} - ${batchEnd}...`);
+		for (let j = i; j <= batchEnd; j++) {
+			ports.push(j);
+			send(ip, j);
+		}
+		await wait_complete();
 	}
 	await wait_complete();
 	consola.success('Done!');
